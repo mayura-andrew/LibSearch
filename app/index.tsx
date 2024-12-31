@@ -10,9 +10,11 @@ import {
   SafeAreaView,
   Platform,
   StatusBar,
+  ActivityIndicator,
+  Alert
 } from 'react-native';
 import WebView from 'react-native-webview';
-import { User, Search, LogOut } from 'lucide-react';
+import { User, Search, LogOut } from 'lucide-react-native';
 
 type RootStackParamList = {
   Auth: undefined;
@@ -63,13 +65,14 @@ const LoginScreen = ({ navigation }: any) => {
     if (url.includes('/opac-user.pl') && !url.includes('?failed=1')) {
       setLoading(false);
       setShowWebView(false);
-      navigation.replace('MainApp');
+      navigation.replace('ProfileScreen');
     } 
     // Check if login failed
     else if (url.includes('?failed=1')) {
       setLoading(false);
       setShowWebView(false);
       // Here you could add error handling, like showing an alert
+      Alert.alert('Login Failed', 'Invalid username or password');
     }
   };
 
@@ -88,6 +91,7 @@ const LoginScreen = ({ navigation }: any) => {
         {loading && (
           <View style={styles.loadingContainer}>
             <Text style={styles.loadingText}>Logging in...</Text>
+            <ActivityIndicator size="large" color="#0000ff" style={styles.loading} />
           </View>
         )}
       </View>
@@ -221,43 +225,22 @@ const LibrarySearchScreen = () => {
   );
 };
 
-// Profile Screen Component
-const ProfileScreen = ({ navigation }: any) => {
-  const handleLogout = () => {
-    navigation.replace('Auth');
-  };
+// // Profile Screen Component
 
+const ProfileScreen = () => {
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.content}>
-        <View style={styles.profileHeader}>
-          <View style={styles.avatarContainer}>
-            <User size={40} color="#3b82f6" />
-          </View>
-          <Text style={styles.profileName}>John Doe</Text>
-          <Text style={styles.profileEmail}>john.doe@ou.ac.lk</Text>
-        </View>
-
-        <View style={styles.profileStats}>
-          <View style={styles.statItem}>
-            <Text style={styles.statNumber}>5</Text>
-            <Text style={styles.statLabel}>Books Borrowed</Text>
-          </View>
-          <View style={styles.statItem}>
-            <Text style={styles.statNumber}>2</Text>
-            <Text style={styles.statLabel}>Due Soon</Text>
-          </View>
-        </View>
-
-        <TouchableOpacity 
-          style={styles.logoutButton}
-          onPress={handleLogout}
-        >
-          <LogOut size={20} color="#ef4444" />
-          <Text style={styles.logoutButtonText}>Logout</Text>
-        </TouchableOpacity>
-      </View>
-    </SafeAreaView>
+    <View style={styles.container}>
+      <WebView
+        source={{ uri: 'https://search.lib.ou.ac.lk/cgi-bin/koha/opac-user.pl' }} // Direct URL to the profile page
+        style={styles.webView}
+        startInLoadingState={true}
+        renderLoading={() => (
+          <ActivityIndicator size="large" color="#0000ff" style={styles.loading} />
+        )}
+        javaScriptEnabled={true}
+        domStorageEnabled={true}
+      />
+    </View>
   );
 };
 
@@ -302,8 +285,10 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
     padding: 20,
-    backgroundColor: '#f8fafc',
+    backgroundColor:'#e2e8f0',
   },
   logo: {
     fontSize: 32,
@@ -311,6 +296,9 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginBottom: 48,
     color: '#3b82f6',
+  },
+  webView: {
+    flex: 1,
   },
   title: {
     fontSize: 24,
@@ -346,7 +334,8 @@ const styles = StyleSheet.create({
   loginButtonText: {
     color: '#fff',
     fontSize: 16,
-    fontWeight: '600',
+    textAlign: 'center',
+    fontWeight: 'bold',
   },
   searchContainer: {
     gap: 16,
@@ -452,6 +441,11 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
   },
+  loading: {
+          flex: 1,
+          justifyContent: 'center',
+          alignItems: 'center',
+        }, 
   ...additionalStyles
 });
 
