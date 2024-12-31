@@ -16,17 +16,12 @@ import {
 import WebView from 'react-native-webview';
 import { User, Search, LogOut } from 'lucide-react-native';
 
-type RootStackParamList = {
-  Auth: undefined;
-  MainApp: undefined;
-};
-
 type TabParamList = {
   Search: undefined;
   Profile: undefined;
+  Login: undefined;
 };
 
-const Stack = createNativeStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator<TabParamList>();
 
 const LoginScreen = ({ navigation }: any) => {
@@ -65,7 +60,6 @@ const LoginScreen = ({ navigation }: any) => {
     if (url.includes('/opac-user.pl') && !url.includes('?failed=1')) {
       setLoading(false);
       setShowWebView(false);
-      navigation.replace('ProfileScreen');
     } 
     // Check if login failed
     else if (url.includes('?failed=1')) {
@@ -206,6 +200,7 @@ const LibrarySearchScreen = () => {
             style={styles.searchInput}
             placeholder="Search for books, journals..."
             value={searchQuery}
+            // editable={false}
             onChangeText={setSearchQuery}
             onSubmitEditing={handleSearch}
             returnKeyType="search"
@@ -251,18 +246,22 @@ const TabNavigator = () => {
       screenOptions={({ route }) => ({
         tabBarIcon: ({ color, size }) => {
           if (route.name === 'Search') {
-            return <Search size={size} color={color} />;
-          } else {
-            return <User size={size} color={color} />;
+            return <Search color={color} size={size} />;
+          } else if (route.name === 'Profile') {
+            return <User color={color} size={size} />;
+          } else if (route.name === 'Login') {
+            return <LogOut color={color} size={size} />;
           }
         },
         tabBarActiveTintColor: '#3b82f6',
         tabBarInactiveTintColor: '#94a3b8',
         headerShown: false,
       })}
+      initialRouteName="Search" // Set the initial route to Search
     >
       <Tab.Screen name="Search" component={LibrarySearchScreen} />
-      <Tab.Screen name="Profile" component={ProfileScreen} />
+      <Tab.Screen name="Login" component={LoginScreen} />
+      <Tab.Screen name="Profile" component={ProfileScreen} />      
     </Tab.Navigator>
   );
 };
@@ -270,10 +269,7 @@ const TabNavigator = () => {
 // Main App Component
 const App = () => {
   return (
-    <Stack.Navigator screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="Auth" component={LoginScreen} />
-      <Stack.Screen name="MainApp" component={TabNavigator} />
-    </Stack.Navigator>
+    <TabNavigator />
   );
 };
 
@@ -347,6 +343,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     paddingHorizontal: 16,
     fontSize: 16,
+    width: 250, // Fixed width of 250 pixels
     backgroundColor: '#fff',
   },
   searchButton: {
