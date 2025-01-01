@@ -108,7 +108,7 @@ export default function LibraryService() {
     }).start(() => setShowSearchTypeModal(false));
   };
 
-  const animateServicePress = (index) => {
+  const animateServicePress = (index:any) => {
     Animated.sequence([
       Animated.spring(serviceScaleValues[index], {
         toValue: 0.95,
