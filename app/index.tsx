@@ -24,7 +24,16 @@ type TabParamList = {
 
 const Tab = createBottomTabNavigator<TabParamList>();
 
+const AuthContext = React.createContext<{
+  isLoggedIn: boolean;
+  setIsLoggedIn: (value: boolean) => void;
+}>({
+  isLoggedIn: false,
+  setIsLoggedIn: () => {},
+})
 const LoginScreen = ({ navigation }: any) => {
+  const { setIsLoggedIn } = React.useContext(AuthContext);
+
   const [userId, setUserId] = useState('');
   const [password, setPassword] = useState('');
   const [showWebView, setShowWebView] = useState(false);
@@ -60,6 +69,10 @@ const LoginScreen = ({ navigation }: any) => {
     if (url.includes('/opac-user.pl') && !url.includes('?failed=1')) {
       setLoading(false);
       setShowWebView(false);
+      setIsLoggedIn(true);
+      navigation.navigate(ProfileScreen);
+      Alert.alert('Success', 'Login successful!');
+
     } 
     // Check if login failed
     else if (url.includes('?failed=1')) {
@@ -241,6 +254,7 @@ const ProfileScreen = () => {
 
 // Tab Navigator
 const TabNavigator = () => {
+  const { isLoggedIn } = React.useContext(AuthContext);
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
@@ -256,21 +270,36 @@ const TabNavigator = () => {
         tabBarActiveTintColor: '#3b82f6',
         tabBarInactiveTintColor: '#94a3b8',
         headerShown: false,
+        tabBarStyle: { 
+          display: route.name === 'Login' && isLoggedIn ? 'none' : 'flex'
+        }
       })}
       initialRouteName="Search" // Set the initial route to Search
     >
-      <Tab.Screen name="Search" component={LibrarySearchScreen} />
-      <Tab.Screen name="Login" component={LoginScreen} />
-      <Tab.Screen name="Profile" component={ProfileScreen} />      
+       <Tab.Screen name="Search" component={LibrarySearchScreen} />
+      {!isLoggedIn ? (
+        <Tab.Screen name="Login" component={LoginScreen} />
+      ) : (
+        <Tab.Screen 
+          name="Profile" 
+          component={ProfileScreen}
+          options={{
+            tabBarBadge: '•',
+            tabBarBadgeStyle: { backgroundColor: '#22c55e' }
+          }}
+        />
+      )}
     </Tab.Navigator>
   );
 };
 
 // Main App Component
 const App = () => {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   return (
-    <TabNavigator />
-  );
+<AuthContext.Provider value={{ isLoggedIn, setIsLoggedIn }}>
+      <TabNavigator />
+    </AuthContext.Provider>  );
 };
 
 const styles = StyleSheet.create({
